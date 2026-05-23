@@ -1,0 +1,1 @@
+"""Multimodal AI Streamlit application."""
