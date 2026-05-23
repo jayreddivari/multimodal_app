@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from multimodal_app.config import WHISPER_MODEL_SIZE
+from config import WHISPER_MODEL_SIZE
 
 
 def transcribe(audio_path: Path, language: str | None = "en") -> str:

@@ -6,7 +6,7 @@ import io
 
 from PIL import Image
 
-from multimodal_app.config import (
+from config import (
     HF_INFERENCE_PROVIDER,
     HF_TEXT_TO_IMAGE_MODEL,
     HUGGINGFACE_API_KEY,

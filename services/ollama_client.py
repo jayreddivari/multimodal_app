@@ -5,8 +5,8 @@ from __future__ import annotations
 import ollama
 from PIL import Image
 
-from multimodal_app.config import OLLAMA_BASE_URL, OLLAMA_CHAT_MODEL, OLLAMA_VISION_MODEL
-from multimodal_app.utils.media import image_to_bytes
+from config import OLLAMA_BASE_URL, OLLAMA_CHAT_MODEL, OLLAMA_VISION_MODEL
+from utils.media import image_to_bytes
 
 
 def _client() -> ollama.Client:
@@ -29,8 +29,16 @@ def text_to_text(prompt: str, system: str | None = None, model: str | None = Non
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
 
-    response = _client().chat(model=model, messages=messages)
-    return response.message.content
+    try:
+        response = _client().chat(model=model, messages=messages)
+        return response.message.content
+    except Exception as exc:
+        raise RuntimeError(
+            f"Ollama is not available at {OLLAMA_BASE_URL}. "
+            "On Streamlit Cloud, use the Hugging Face provider and set "
+            "HUGGINGFACE_API_KEY (or HF_TOKEN) in App Settings → Secrets. "
+            "Locally, add the same key to .env."
+        ) from exc
 
 
 def image_to_text(
@@ -41,17 +49,23 @@ def image_to_text(
     model = model or OLLAMA_VISION_MODEL
     image_bytes = image_to_bytes(image, fmt="JPEG")
 
-    response = _client().chat(
-        model=model,
-        messages=[
-            {
-                "role": "user",
-                "content": prompt,
-                "images": [image_bytes],
-            }
-        ],
-    )
-    return response.message.content
+    try:
+        response = _client().chat(
+            model=model,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                    "images": [image_bytes],
+                }
+            ],
+        )
+        return response.message.content
+    except Exception as exc:
+        raise RuntimeError(
+            f"Ollama is not available at {OLLAMA_BASE_URL}. "
+            "Install BLIP locally or use Ollama with text_to_text generation."
+        ) from exc
 
 
 def summarize_texts(texts: list[str], instruction: str, model: str | None = None) -> str:

@@ -6,7 +6,7 @@ import asyncio
 import tempfile
 from pathlib import Path
 
-from multimodal_app.config import EDGE_TTS_VOICE
+from config import EDGE_TTS_VOICE
 
 
 async def _synthesize_async(text: str, voice: str, output_path: Path) -> None:

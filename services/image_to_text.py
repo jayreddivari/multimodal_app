@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from PIL import Image
 
-from multimodal_app.config import BLIP_MODEL_ID
-from multimodal_app.services import ollama_client
+from config import BLIP_MODEL_ID
+from . import ollama_client
 
 
 def _parse_pipeline_result(result) -> str:
@@ -74,7 +74,7 @@ def _caption_with_blip(
 def describe(
     image: Image.Image,
     prompt: str = "Describe this image in detail.",
-    provider: str = "ollama",
+    provider: str = "blip",
 ) -> str:
     if provider == "ollama":
         try:

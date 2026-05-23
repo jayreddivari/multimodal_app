@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from multimodal_app.config import VIDEO_FRAME_SAMPLE_COUNT
-from multimodal_app.services import audio_to_text, image_to_text, ollama_client
-from multimodal_app.utils.media import sample_video_frames
+from config import VIDEO_FRAME_SAMPLE_COUNT
+from . import audio_to_text, image_to_text, text_to_text
+from utils.media import sample_video_frames
 
 
 def describe_video(
@@ -28,11 +28,11 @@ def describe_video(
         )
         captions.append(f"Frame {i}: {caption}")
 
+    # Use text-to-text for summarization (auto-detects HuggingFace or Ollama)
     try:
-        summary = ollama_client.summarize_texts(
-            captions,
-            instruction=user_prompt,
-        )
+        joined = "\n".join(captions)
+        summary_prompt = f"{user_prompt}\n\nFrame captions:\n{joined}"
+        summary = text_to_text.generate(summary_prompt)
     except Exception:
         summary = "\n".join(captions)
 

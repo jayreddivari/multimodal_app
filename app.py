@@ -21,6 +21,7 @@ from PIL import Image
 from config import (
     EDGE_TTS_VOICE,
     HF_TEXT_TO_IMAGE_MODEL,
+    HF_TEXT_TO_TEXT_MODEL,
     HUGGINGFACE_API_KEY,
     OLLAMA_BASE_URL,
     OLLAMA_CHAT_MODEL,
@@ -74,8 +75,14 @@ def _sidebar() -> dict:
     chat_model = st.sidebar.text_input("Chat model", value=OLLAMA_CHAT_MODEL)
     vision_model = st.sidebar.text_input("Vision model", value=OLLAMA_VISION_MODEL)
 
-    hf_status = "set" if HUGGINGFACE_API_KEY else "not set"
-    st.sidebar.caption(f"Hugging Face token: {hf_status}")
+    if HUGGINGFACE_API_KEY:
+        st.sidebar.success("Hugging Face token: set")
+    else:
+        st.sidebar.warning("Hugging Face token: not set")
+        st.sidebar.caption(
+            "On Streamlit Cloud, add `HUGGINGFACE_API_KEY` under "
+            "**Manage app → Settings → Secrets** (`.env` is not deployed)."
+        )
 
     whisper_size = st.sidebar.selectbox(
         "Whisper size (audio→text)",
@@ -98,13 +105,34 @@ def _sidebar() -> dict:
     }
 
 
+def _text_to_text_providers(ollama_ok: bool) -> list[str]:
+    if ollama_ok:
+        return ["ollama", "langchain_ollama", "huggingface"]
+    return ["huggingface", "ollama", "langchain_ollama"]
+
+
 def _render_text_to_text(settings: dict) -> None:
     st.subheader("Text → Text")
-    st.caption("Chat with a local LLM via Ollama (free). Optional: Hugging Face endpoint.")
+    st.caption(
+        "Chat via Ollama (local) or Hugging Face Inference API (works on Streamlit Cloud)."
+    )
+
+    providers = _text_to_text_providers(settings["ollama_ok"])
+    if not settings["ollama_ok"] and not HUGGINGFACE_API_KEY:
+        st.warning(
+            "Ollama is not reachable here. Set `HUGGINGFACE_API_KEY` in Streamlit Secrets "
+            "and choose the **huggingface** provider."
+        )
 
     col1, col2 = st.columns([2, 1])
     with col2:
-        provider = st.selectbox("Provider", ["ollama", "langchain_ollama", "huggingface"])
+        provider = st.selectbox("Provider", providers)
+        hf_model = st.text_input(
+            "HF chat model",
+            value=HF_TEXT_TO_TEXT_MODEL,
+            help="Must support Inference Providers — see huggingface.co/inference/models",
+            disabled=provider != "huggingface",
+        )
     with col1:
         system = st.text_area("System prompt (optional)", height=68)
         prompt = st.text_area("Your message", height=140, placeholder="Ask anything...")
@@ -119,6 +147,7 @@ def _render_text_to_text(settings: dict) -> None:
                     prompt.strip(),
                     system=system.strip() or None,
                     provider=provider,
+                    hf_model=hf_model.strip() if provider == "huggingface" else None,
                 )
                 st.markdown("### Response")
                 st.write(out)
@@ -173,10 +202,13 @@ def _render_image_to_text(settings: dict) -> None:
 
     uploaded = st.file_uploader("Upload image", type=["png", "jpg", "jpeg", "webp"])
     prompt = st.text_input("Question / instruction", value="Describe this image in detail.")
+    img_providers = (
+        ["blip", "ollama"] if not settings["ollama_ok"] else ["ollama", "blip"]
+    )
     provider = st.selectbox(
         "Provider",
-        ["ollama", "blip"],
-        help="ollama uses llava; falls back to BLIP if vision model is missing",
+        img_providers,
+        help="blip runs locally; ollama uses llava (local only)",
     )
 
     if uploaded and st.button("Analyze image", type="primary"):
@@ -257,7 +289,10 @@ def _render_video_summary(settings: dict) -> None:
         "Summary instruction",
         value="Summarize what happens in this video in 2–3 paragraphs.",
     )
-    frame_provider = st.selectbox("Frame caption provider", ["blip", "ollama"])
+    frame_providers = (
+        ["blip", "ollama"] if not settings["ollama_ok"] else ["blip", "ollama"]
+    )
+    frame_provider = st.selectbox("Frame caption provider", frame_providers)
     max_frames = st.slider("Frames to sample", 3, 12, 6)
 
     if video and st.button("Analyze video", type="primary"):
@@ -325,7 +360,7 @@ def main() -> None:
         st.markdown(
             """
             1. **Ollama** — `ollama serve` then `ollama pull llama3.1:8b` and `ollama pull llava`
-            2. **Hugging Face** — free token in `.env` as `HUGGINGFACE_API_KEY` (for text→image)
+            2. **Hugging Face** — `HUGGINGFACE_API_KEY` in `.env` locally, or in **Streamlit Secrets** on Cloud
             3. **ffmpeg** — `brew install ffmpeg` (for video/audio formats)
             4. **First run** — Whisper & BLIP download weights on first use (one-time)
             """
