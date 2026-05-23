@@ -5,14 +5,17 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv
-
 _PACKAGE_DIR = Path(__file__).resolve().parent
 _PARENT_DIR = _PACKAGE_DIR.parent
 
+try:
+    from dotenv import load_dotenv
 
-load_dotenv(_PARENT_DIR / ".env")
-load_dotenv(_PACKAGE_DIR / ".env", override=True)
+    load_dotenv(_PARENT_DIR / ".env")
+    load_dotenv(_PACKAGE_DIR / ".env", override=True)
+except ImportError:
+    # Streamlit Cloud secrets are env vars; dotenv is optional at runtime.
+    pass
 
 # Ollama (local, free)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
