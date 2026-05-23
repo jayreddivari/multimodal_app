@@ -236,7 +236,3 @@ pip install -U pip
 pip install -r requirements.txt
 streamlit run app.py
 ```
-
-## License
-
-Add your license here if you publish the project.
