@@ -18,7 +18,7 @@ if str(_REPO_ROOT) not in sys.path:
 import streamlit as st
 from PIL import Image
 
-from multimodal_app.config import (
+from config import (
     EDGE_TTS_VOICE,
     HF_TEXT_TO_IMAGE_MODEL,
     HUGGINGFACE_API_KEY,
@@ -27,7 +27,7 @@ from multimodal_app.config import (
     OLLAMA_VISION_MODEL,
     WHISPER_MODEL_SIZE,
 )
-from multimodal_app.services import (
+from services import (
     audio_to_text,
     image_to_text,
     ollama_client,
@@ -36,7 +36,7 @@ from multimodal_app.services import (
     text_to_text,
     video_analysis,
 )
-from multimodal_app.utils.media import pil_from_upload, save_upload_to_temp
+from utils.media import pil_from_upload, save_upload_to_temp
 
 st.set_page_config(
     page_title="Multimodal AI Studio",
@@ -237,7 +237,7 @@ def _render_audio_to_text(settings: dict) -> None:
         with st.spinner(f"Transcribing with Whisper ({settings['whisper_size']})..."):
             try:
                 # Patch model size at runtime via env is awkward; pass through config
-                import multimodal_app.config as cfg
+                import config as cfg
 
                 cfg.WHISPER_MODEL_SIZE = settings["whisper_size"]
                 lang = None if language == "auto" else language
@@ -289,7 +289,7 @@ def _render_video_transcribe(settings: dict) -> None:
         path = save_upload_to_temp(video, suffix=Path(video.name).suffix)
         with st.spinner("Transcribing audio track..."):
             try:
-                import multimodal_app.config as cfg
+                import config as cfg
 
                 cfg.WHISPER_MODEL_SIZE = settings["whisper_size"]
                 out = video_analysis.transcribe_video_audio(path)
