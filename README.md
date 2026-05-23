@@ -156,7 +156,7 @@ uv run --directory multimodal_app streamlit run app.py
 
 ### Per-task notes
 
-- **Text → Text** — Choose provider: `ollama`, `langchain_ollama`, or `huggingface`. If Ollama is not reachable, the app prefers Hugging Face when `HUGGINGFACE_API_KEY` is set.
+- **Text → Text** — Choose provider: `ollama`, or `huggingface`. If Ollama is not reachable, the app prefers Hugging Face when `HUGGINGFACE_API_KEY` is set.
 - **Text → Image** — Requires `HUGGINGFACE_API_KEY` with Inference Providers permission. Generation can take 30–60 seconds.
 - **Image → Text** — Upload PNG/JPG/WebP. `ollama` uses the vision model and falls back to BLIP if vision is unavailable. When Ollama is offline, **blip** is shown first.
 - **Text → Audio** — Uses Microsoft edge voices; no API key. Output is MP3.

@@ -107,8 +107,8 @@ def _sidebar() -> dict:
 
 def _text_to_text_providers(ollama_ok: bool) -> list[str]:
     if ollama_ok:
-        return ["ollama", "langchain_ollama", "huggingface"]
-    return ["huggingface", "ollama", "langchain_ollama"]
+        return ["ollama", "huggingface"]
+    return ["huggingface", "ollama"]
 
 
 def _render_text_to_text(settings: dict) -> None:

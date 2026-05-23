@@ -85,15 +85,4 @@ def generate(
 
         return response.choices[0].message.content
 
-    if provider == "langchain_ollama":
-        llm = ChatOllama(
-            model=OLLAMA_CHAT_MODEL,
-            base_url=OLLAMA_BASE_URL,
-        )
-        messages = []
-        if system:
-            messages.append(SystemMessage(content=system))
-        messages.append(HumanMessage(content=prompt))
-        return llm.invoke(messages).content
-
     raise ValueError(f"Unknown provider: {provider}")
