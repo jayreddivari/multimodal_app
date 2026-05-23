@@ -1,5 +1,8 @@
 # Multimodal AI Studio
 
+## This app is hosted on streamlit and can be accessed here:
+https://multimodalapp-jayreddiv.streamlit.app/
+
 A **Streamlit** web app for experimenting with multimodal AI tasks using mostly **free, local, or open** tools: [Ollama](https://ollama.com), [Hugging Face Inference Providers](https://huggingface.co/docs/inference-providers/index), [OpenAI Whisper](https://github.com/openai/whisper), [BLIP](https://huggingface.co/Salesforce/blip-image-captioning-base), and [edge-tts](https://github.com/rany2/edge-tts).
 
 ## Features
